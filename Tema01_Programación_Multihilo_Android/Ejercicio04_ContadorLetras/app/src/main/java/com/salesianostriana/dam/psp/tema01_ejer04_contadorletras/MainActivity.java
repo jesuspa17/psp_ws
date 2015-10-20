@@ -19,6 +19,32 @@ import java.util.concurrent.Future;
 /**
  * @author Jesús Pallares
  */
+ 
+ /**
+  (4) Contador de letras por palabra
+
+Implementar una aplicación que realice varios cáclulos sobre un texto que se le proporcione, 
+y cuya interfaz tenga los siguientes elementos:
+
+    -Un EditText (de varias líneas) en el que podremos escribir un texto. 
+    Para facilitar la corrección del ejercicio, este traerá precargado, por defecto, el primer 
+    párrafo de El Quijo (ver aquí).
+    -Un Button, que cuando sea pulsado comenzará el proceso de cálculo.
+    -Un Button, que reseteará el texto del EditText.
+    -Un TextView, donde mostrará los resultados del cálculo.
+
+Los cálculos que deberá realizar la app, u cuyos resultados debe mostrar son:
+
+    -Número de palabras que tiene el texto (el método lo definirá el/la alumno/a).
+    -Suma del número de letras que tienen las palabras (sin contar espacios, 
+    símbolos o signos de puntuación). Para calcularlo, tendrá que hacer uso de una clase 
+    que implemente Callable<Integer>, que recibirá en el constructor una palabra, 
+    y que devolverá el número de letras de esa palabra. Para ejecutar los Callable, se hará uso de un 
+    Thread Pool de 3 hilos. Hay que tener en cuenta que para recoger los diferentes Future<Integer> 
+    que se generarán, habrá que usar una colección.
+    -Número medio de letras por palabra.
+
+  * */
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
