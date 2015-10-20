@@ -4,6 +4,17 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+/**
+ (1) Números pares e impares
+
+Implementar una app que haciendo uso de dos hilos de ejecución secundarios (diferentes al hilo principal) que realicen las siguientes tareas:
+
+    Hilo 1: imprimir por el log los 100 primeros números pares. 
+    Al finalizar la impresión de números, debe aparecer el mensaje FINAL DEL HILO 1.
+    Hilo 2: imprimir por el log los 100 primeros números impares. 
+    Al finalizar la impresión de números, debe aparecer el mensaje FINAL DEL HILO 2.
+    
+ * */
 
 public class MainActivity extends Activity {
 
