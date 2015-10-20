@@ -9,6 +9,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+/**
+(3) Cronómetro cuenta a atrás.
+
+En este ejercicio realizaremos un app Android que nos permita ejecutar una cuenta atrás. 
+Para ello, se proporciona parte del código fuente. 
+
+Siguiendo las indicaciones que aparecen como comentarios en el código fuente del fichero MainActivity.java, 
+tendremos que implementar, haciendo uso de un hilo de ejecución secundario, una cuenta atrás real, 
+que vaya actualizando el tiempo en pantalla cada segundo.
+
+ * */
+
 public class MainActivity extends AppCompatActivity {
 
 
