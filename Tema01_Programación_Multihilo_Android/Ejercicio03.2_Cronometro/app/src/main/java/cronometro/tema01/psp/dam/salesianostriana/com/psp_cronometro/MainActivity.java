@@ -12,6 +12,29 @@ import android.widget.TextView;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+/**
+ (3.2) Cronómetro cuenta a atrás.
+ 
+Modificar la implementación anterior (en un nuevo proyecto) para que el cronómetro 
+de cuente atrás tenga estas dos funcionalidades:
+
+    Un nuevo EditText, en el que podamos introducir la frecuencia con la que se va a 
+    actualizar el TextView con el tiempo restante. El número introducido se expresará en milisegundos. 
+    Si por ejemplo, el usuario introduce que quiere realizar una cuenta atrás de 10 segundos, 
+    y quiere que se actualice cada 700 milisegundos, el texto a mostrar debería ser el siguiente:
+
+    10 s.
+    9.3 s
+    8.6 s
+    7.9 s.
+    ...
+    0.9 s
+    0.2 s
+    0 s
+
+    Un Button, que sirva para pausar/reanudar el cronómetro de cuenta atrás.
+ 
+ * */
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
