@@ -11,10 +11,38 @@ import android.widget.EditText;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+/**
+ (5) FuerzaBruta: testeo de la fortaleza de una contraseña
+
+Vamos a realizar una aplicación que sea capaz de realizar un ataque por fuerza bruta para conseguir 
+adivinar una contraseña. Nos servirá para poder mediar la fortaleza de la contraseña.
+
+Un ataque por fuerza bruta, como su nombre indica, consiste en probar todas la posibilidades 
+que existen, hasta dar con la correcta.
+
+Para ello, vamos a desarrollar una aplicación que tenga la siguiente interfaz de usuario:
+
+    -Un EditText, donde se introducirá la contraseña a testear. La cadena introducida 
+    habrá que pasarla a mayúsculas (para simplificar el proceso)
+    -Un Button, para lanzar el testeo por fuerza bruta.
+
+
+Para ir generando las cadenas aleatorias, tenemos disponible la clase UtilRandomString, 
+con un método llamado getCadenaAlfanumAleatoria, que devuelve un String del número de 
+caracteres que le pasemos como argumento.
+
+El proceso de búsqueda hay que lanzarlo mediante un pool de hilos de 1 solo hilo.
+
+Cuando se descubra cual es la contraseña, se debe informar al usuario y parar el proceso de búsqueda. 
+Mientras tanto, se debe ir informando al usuario (por el Log) de los intentos realizados 
+(como ir avisando de todos sería muy tedioso, lo haremos de 500 en 500 intentos).
+
+Se debe medir el tiempo que ha tardado en realizar el proceso, e imprimirlo por el Log.
+
+NOTA: Si el programa su pusiera a pensar y pensar y no fuera capaz de sacar la contraseña, podemos simplificar el proceso de búsqueda generando cadena solamente de la longitud de la contraseña introducida.
+ * */
 
 public class MainActivity extends AppCompatActivity {
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
