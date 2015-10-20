@@ -11,6 +11,13 @@ import android.widget.TextView;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+/**
+(3.1) Cronómetro cuenta a atrás (con ExecutorService).
+
+Modificar (en un nuevo proyecto) el ejercicio anterior para lanzar gestionar el cronómetro 
+a través de un ExecutorService construido sobre un Thread Pool de 1 solo hilo.
+
+ * */
 
 public class MainActivity extends AppCompatActivity {
 
