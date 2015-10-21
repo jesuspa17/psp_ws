@@ -12,23 +12,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
 public class HandlerActivity extends AppCompatActivity {
 
+    //Atributos
     EditText direccion;
-    Button descargar;
+    ImageButton descargar;
     ImageView iv;
     ProgressDialog progressDialog;
+    URL imageUrl;
+    Bitmap imagen;
 
-    URL imageUrl = null;
-    Bitmap imagen = null;
+    int maxProgreso;
+
 
     Handler puente = new Handler() {
 
@@ -38,8 +43,17 @@ public class HandlerActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            Bitmap img = (Bitmap)msg.obj;
-            iv.setImageBitmap(img);
+
+            int progreso = (Integer) msg.obj;
+            progressDialog.setProgress(progreso);
+            //Si hemos finalizado el progreso, hacemos
+            // desaparecer el diálogo
+            if (progreso == maxProgreso) {
+                progressDialog.dismiss();
+                Toast.makeText(HandlerActivity.this, "Tamaño imagen descargada: " + FormatoTamanyo.formatearTamanyo(maxProgreso), Toast.LENGTH_SHORT).show();
+                //coloca en el imageView la imagen Bitmap
+                iv.setImageBitmap(imagen);
+            }
 
         }
 
@@ -50,61 +64,77 @@ public class HandlerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_handler);
 
-        direccion = (EditText) findViewById(R.id.editUrl);
-        descargar = (Button) findViewById(R.id.btn_okUrl);
+        //se obtienen los elementos de la UI
+        descargar = (ImageButton) findViewById(R.id.btn_okUrl);
         direccion = (EditText) findViewById(R.id.editUrl);
         iv = (ImageView) findViewById(R.id.img_descargada);
 
-        Intent i= getIntent();
-        final String dir= i.getStringExtra("url");
+        //obtendrá la url desde el MainActivity
+        Intent i = getIntent();
+        final String dir = i.getStringExtra("url");
         direccion.setText(dir);
 
         descargar.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
+                //comprueba que existe url en el EditText
+                if (direccion.getText().toString().isEmpty())
 
-                        imageUrl = new URL(dir);
+                    Toast.makeText(HandlerActivity.this, "Introduce URL por favor", Toast.LENGTH_LONG).show();
 
-                        InputStream is = imageUrl.openStream();
-                        imagen = BitmapFactory.decodeStream(is);
+                else
+                    //se inicia la barra de progreso al pulsar el el botón descargar.
+                    progressDialog = new ProgressDialog(HandlerActivity.this);
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    progressDialog.setMessage("Descargando imagen...");
+                    progressDialog.setProgress(0);
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
 
-                        Message m = new Message();
-                        m.obj = imagen;
-                        puente.sendMessage(m);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
 
-                    }catch(IOException ex){
-                        ex.printStackTrace();
-                    }
+                                //se almacena la url de la imagen en un objeto URL
+                                imageUrl = new URL(dir);
+
+                                //se abre la conexión
+                                InputStream input = imageUrl.openStream();
+
+                                //se obtiene el tamaño del archivo a descargar
+                                URLConnection conexion = imageUrl.openConnection();
+                                maxProgreso = conexion.getContentLength();
+
+                                //establecemos el tamaño del proceso en función del tamaño de la imagen que se descargará
+                                //que obtuvimos en la linea de código de arriba
+                                progressDialog.setMax(maxProgreso);
+
+                                for (int i = 1; i <= maxProgreso; i++) {
+                                    int contador = i;
+                                    //Creamos la nueva instancia de mensaje
+                                    Message m = new Message();
+                                    //Le asignamos el contenido
+                                    m.obj = contador;
+                                    //Enviamos el mensaje
+                                    puente.sendMessage(m);
+                                }
+                                //guarda en un objeto Bitmap la imagen descargada
+                                imagen = BitmapFactory.decodeStream(input);
+
+
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }).start();
                 }
-            }).start();
-
-
-            /*
-            int tam = 0;
-            int c;
-            while ((c = is.read()) != -1) {
-                tam += c;
-            }
-
-            //Estas líneas sirven para inicializar el diálogo
-            progressDialog = new ProgressDialog(HandlerActivity.this);
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setMessage("Cargando...");
-            progressDialog.setMax(10000);
-            progressDialog.setProgress(0);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-            */
-
-        }
-    });
+            });
 
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

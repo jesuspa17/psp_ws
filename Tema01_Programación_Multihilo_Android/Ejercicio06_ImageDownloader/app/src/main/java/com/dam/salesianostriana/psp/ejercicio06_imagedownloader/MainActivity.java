@@ -47,12 +47,26 @@ public class MainActivity extends AppCompatActivity {
         btn_async = (Button) findViewById(R.id.btn_async);
         btn_hand = (Button) findViewById(R.id.btn_handler);
 
+        //url inicial de ejemplo
         final String url = "http://web.salesianos-sevilla.com/Archivos/Galerias/Mis_Galerias/SMX/140530-3logo.jpg";
 
+        //Incia HandlerActivity
         btn_hand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MainActivity.this, HandlerActivity.class);
+                i.putExtra("url",url);
+                startActivity(i);
+            }
+        });
+
+        //Inicia AsyncTaskActivity
+        btn_async.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(MainActivity.this, AsyncTaskActivity.class);
                 i.putExtra("url",url);
                 startActivity(i);
             }
