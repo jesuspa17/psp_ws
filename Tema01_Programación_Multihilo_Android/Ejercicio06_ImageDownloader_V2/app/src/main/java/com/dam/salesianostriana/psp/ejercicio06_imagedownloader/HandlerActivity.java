@@ -34,7 +34,8 @@ public class HandlerActivity extends AppCompatActivity {
     URL imageUrl;
     Bitmap imagen;
 
-    int fileSize;
+    int tamanyo_archivo;
+
 
 
     Handler puente = new Handler() {
@@ -45,21 +46,35 @@ public class HandlerActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-
             float progreso = (Float) msg.obj;
             progressDialog.setProgress((int) progreso);
             //Si hemos finalizado el progreso, hacemos
             // desaparecer el diálogo
             if (progreso == 100) {
                 progressDialog.dismiss();
-                Toast.makeText(HandlerActivity.this, "Tamaño imagen descargada: " + FormatoTamanyo.formatearTamanyo(fileSize), Toast.LENGTH_LONG).show();
-                //coloca en el imageView la imagen Bitmap
-                iv.setImageBitmap(imagen);
+                Toast.makeText(HandlerActivity.this, "Tamaño imagen descargada: " + FormatoTamanyo.formatearTamanyo(tamanyo_archivo), Toast.LENGTH_LONG).show();
             }
 
         }
 
     };
+    //Método que recoje la información de la imagen descargada
+    Handler imagen_view = new Handler() {
+
+        //Este es el método que hay que sobreescribir. Aquí dentro
+        //escribimos el código que recoge la información del mensaje
+        //y la muestra, de manera conveniente, en la interfaz de usuario.
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bitmap imagen = (Bitmap) msg.obj;
+            iv.setImageBitmap(imagen);
+
+        }
+
+    };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,33 +116,45 @@ public class HandlerActivity extends AppCompatActivity {
 
                                 final int TAM = 10;
                                 byte[] buff = new byte[TAM];
-                                int len;
+                                int longitud;
 
                                 //se almacena la url de la imagen en un objeto URL
                                 imageUrl = new URL(dir);
 
-                                //se abre la conexión
+                                //se abre la conexión y se obtiene el tamaño de conexión
                                 InputStream input = imageUrl.openStream();
-
                                 URLConnection conexion = imageUrl.openConnection();
-                                fileSize = conexion.getContentLength();
+                                tamanyo_archivo = conexion.getContentLength();
 
+                                /**Flujos que servirán para descargar la imagen mientras se envia el proceso de descarga
+                                en tiempo real
+                                 1. Bis = leerá la imagen que se está descargando.
+                                 2. Baos = la irá almacenando para después almacenarla en un Bitmap con el método de
+                                 BitmapFactory.deCodeByteArray()..
+                                 */
                                 BufferedInputStream bis = new BufferedInputStream(input);
                                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                int readedSize = 0;
 
-                                while((len = bis.read(buff)) > 0) {
-                                    readedSize += len;
-                                    float percentaje = (readedSize/ (float) fileSize)*100;
+                                int tamanyo_leido = 0;
+
+                                while((longitud = bis.read(buff)) > 0) {
+                                    tamanyo_leido += longitud;
+                                    float porcen = (tamanyo_leido/ (float) tamanyo_archivo)*100;
                                     Message msg = new Message();
-                                    msg.obj = percentaje;
+                                    msg.obj = porcen;
                                     puente.sendMessage(msg);
-                                    baos.write(buff, 0, len);
+                                    baos.write(buff, 0, longitud);
 
                                 }
+                                //se almacena la imagen descargada
                                 byte[] result = baos.toByteArray();
-
                                 imagen = BitmapFactory.decodeByteArray(result,0, result.length);
+
+                                //se envia el Bitmap de la imagen al Handler
+                                Message msg_imagen = new Message();
+                                msg_imagen.obj = imagen;
+                                imagen_view.sendMessage(msg_imagen);
+
 
                             } catch (IOException ex) {
                                 ex.printStackTrace();

@@ -48,7 +48,9 @@ public class MainActivity extends AppCompatActivity {
         btn_hand = (Button) findViewById(R.id.btn_handler);
 
         //url inicial de ejemplo
-        final String url = "https://lavsdeo.files.wordpress.com/2012/06/mc2aastma-delaesperanzamacarena1098.jpg";
+        //https://pbs.twimg.com/profile_images/552902544716861441/e25RkDbr.jpeg
+        //https://lavsdeo.files.wordpress.com/2012/06/mc2aastma-delaesperanzamacarena1098.jpg
+        final String url = "https://pbs.twimg.com/profile_images/552902544716861441/e25RkDbr.jpeg";
 
         //Incia HandlerActivity
         btn_hand.setOnClickListener(new View.OnClickListener() {

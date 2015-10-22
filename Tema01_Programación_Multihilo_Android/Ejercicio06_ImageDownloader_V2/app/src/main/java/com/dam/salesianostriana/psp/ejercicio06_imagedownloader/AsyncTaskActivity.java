@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +16,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -31,7 +34,7 @@ public class AsyncTaskActivity extends AppCompatActivity {
     URL imageUrl;
     Bitmap imagen;
 
-    int maxProgreso;
+    int tamanyo_archivo;
 
     String dir;
 
@@ -80,31 +83,46 @@ public class AsyncTaskActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
+                final int TAM = 15;
+                byte[] buff = new byte[TAM];
+                int longitud;
+
                 //se almacena la url de la imagen en un objeto URL
                 imageUrl = new URL(dir);
 
-                //se abre la conexión
+                //se abre la conexión y se obtiene el tamaño de conexión
                 InputStream input = imageUrl.openStream();
-
-                //se obtiene el tamaño del archivo a descargar
                 URLConnection conexion = imageUrl.openConnection();
-                maxProgreso = conexion.getContentLength();
+                tamanyo_archivo = conexion.getContentLength();
 
-                //establecemos el tamaño del proceso en función del tamaño de la imagen que se descargará
-                //que obtuvimos en la linea de código de arriba
-                progressDialog.setMax(maxProgreso);
+                /**Flujos que servirán para descargar la imagen mientras se envia el proceso de descarga
+                 en tiempo real
+                 1. Bis = leerá la imagen que se está descargando.
+                 2. Baos = la irá almacenando para después almacenarla en un Bitmap con el método de
+                 BitmapFactory.deCodeByteArray()..
+                 */
+                BufferedInputStream bis = new BufferedInputStream(input);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-                for (int i = 1; i <= maxProgreso; i++) {
-                    publishProgress(i);
+                int tamanyo_leido = 0;
+
+                while ((longitud = bis.read(buff)) > 0) {
+                    tamanyo_leido += longitud;
+                    float porcen = (tamanyo_leido / (float) tamanyo_archivo) * 100;
+                    publishProgress((int) porcen);
+
                 }
-                //guarda en un objeto Bitmap la imagen descargada
-                imagen = BitmapFactory.decodeStream(input);
+                //se almacena la imagen descargada
+                byte[] result = baos.toByteArray();
+                imagen = BitmapFactory.decodeByteArray(result, 0, result.length);
+
 
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
             return null;
         }
+
         //Ejecuta el hilo UI, actualizando la interfaz de usuario.
         @Override
         protected void onProgressUpdate(Integer... values) {
@@ -117,13 +135,13 @@ public class AsyncTaskActivity extends AppCompatActivity {
             //oculta el progressDialog y muestra la imagen descargada en el ImageView
             progressDialog.dismiss();
             Toast.makeText(AsyncTaskActivity.this, "Tamaño imagen descargada: "
-                    + FormatoTamanyo.formatearTamanyo(maxProgreso), Toast.LENGTH_SHORT).show();
+                    + FormatoTamanyo.formatearTamanyo(tamanyo_archivo), Toast.LENGTH_SHORT).show();
+            Log.i("COLOCAR IMAGEN", "IMG");
             //coloca en el imageView la imagen Bitmap
             iv.setImageBitmap(imagen);
 
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
