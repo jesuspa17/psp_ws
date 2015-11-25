@@ -1,4 +1,4 @@
-package com.dam.salesianostriana.psp.ejercicio01_speedyweb;
+﻿package com.dam.salesianostriana.psp.ejercicio01_speedyweb;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
 /**
- (1) SpeedyWe
+ (1) SpeedyWeB
 
  Vamos a implementar nuestro propio navegador de internet.
  Para ello, definiremos una interfaz de usuario que tendrá,
