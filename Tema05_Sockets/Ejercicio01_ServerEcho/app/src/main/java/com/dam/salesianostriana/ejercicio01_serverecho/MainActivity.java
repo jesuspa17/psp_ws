@@ -8,18 +8,27 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     EditText txtMensaje;
     Button btnEnviar;
+    ListView listView;
+    ArrayList<String> lista_mensajes;
+
     Socket s = null;
 
     @Override
@@ -31,32 +40,42 @@ public class MainActivity extends AppCompatActivity {
 
         txtMensaje = (EditText) findViewById(R.id.editTextMensaje);
         btnEnviar = (Button) findViewById(R.id.btn_enviar);
+        listView = (ListView) findViewById(R.id.listView);
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
 
-                        try {
-                            //Se inicializa el Socket, conectandolo a la IP del servidor y puerto adecuado
-                            s = new Socket("172.27.60.7", 10000);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
+        lista_mensajes = new ArrayList<>();
 
-                }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    //Se inicializa el Socket, conectandolo a la IP del servidor y puerto adecuado
+                    s = new Socket("192.168.65.2", 10000);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }).start();
 
         btnEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                new recibirMensaje().execute(txtMensaje.getText().toString());
+                String msg = txtMensaje.getText().toString();
+                if(msg.trim().isEmpty()){
+                    Toast.makeText(MainActivity.this,"Escribe algo killo",Toast.LENGTH_SHORT).show();
+                }else{
+                    new enviarMensaje().execute(msg);
+                    txtMensaje.setText("");
+                }
 
             }
         });
     }
 
-    private class recibirMensaje extends AsyncTask<String, Void, String>{
+    private class enviarMensaje extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {
@@ -65,12 +84,23 @@ public class MainActivity extends AppCompatActivity {
 
             try {
 
-                PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
-                mensaje = params[0];
-                //Se envia la información
+                //Flujos necesarios.
+                BufferedReader bf = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(s.getOutputStream()),true);
+
+                Log.i("ENVIADO", "ENVIADO");
                 printWriter.println(params[0]);
-                //Se fuerza el envio.
                 printWriter.flush();
+
+                mensaje = bf.readLine();
+                if(mensaje!=null){
+                    Log.i("RECIBIDO",mensaje);
+                }
+
+                if(params[0].equals("FIN")){
+                    Toast.makeText(MainActivity.this,"Se ha finalizado la conexión",Toast.LENGTH_SHORT).show();
+                    s.close();
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -80,13 +110,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String socket) {
-            super.onPostExecute(socket);
-            txtMensaje.setText("");
-            Log.i("MENSAJE_RECIBIDO",socket);
+        protected void onPostExecute(String msg) {
+            super.onPostExecute(msg);
+            if(msg!=null){
+                lista_mensajes.add(msg);
+                ArrayAdapter<String> adaptador = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, lista_mensajes);
+                listView.setAdapter(adaptador);
+            }
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

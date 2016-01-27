@@ -32,6 +32,8 @@ public class ServerEcho {
             //Se instancia el BufferedReader sobre el flujo de entrada del socket
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(s.getOutputStream()),true);
+
             //El mensaje FIN será el que finalice la comunicación entre cliete y servidor.
             //Mientras tanto, vamos leyendo los mensajes y escribimos en la consola.
             String mensaje;
@@ -39,9 +41,7 @@ public class ServerEcho {
             while (!(mensaje = bufferedReader.readLine()).equalsIgnoreCase("FIN")) {
                 System.out.println(">> " + mensaje);
 
-                PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(s.getOutputStream()),true);
-                String datos = bufferedReader.readLine();
-                printWriter.println(datos);
+                printWriter.println(mensaje);
                 printWriter.flush();
 
             }
