@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/salesianostriana/psp/sharapp/SharappMessage.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/salesianostriana/psp/sendfiles/SharappMessage.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/salesianostriana/psp/sendfiles/server/Connect.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/salesianostriana/psp/sendfiles/server/FileServer.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/salesianostriana/psp/sendfiles/server/Recieve.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/salesianostriana/psp/sendfiles/server/Send.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/salesianostriana/psp/sendfiles/server/User.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/salesianostriana/psp/sendfiles/server/Utils.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/sendfiles/SharappMessage.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/sendfiles/server/Connect.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/sendfiles/server/FileServer.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/sendfiles/server/Recieve.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/sendfiles/server/Send.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/sendfiles/server/User.java" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/sharap_server/src/main/java/com/sendfiles/server/Utils.java" charset="windows-1252" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>
