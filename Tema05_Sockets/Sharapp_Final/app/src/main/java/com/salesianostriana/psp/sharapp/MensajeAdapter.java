@@ -34,7 +34,6 @@ public class MensajeAdapter extends RecyclerView.Adapter<MensajeAdapter.ViewHold
 
         public ViewHolder(View v) {
             super(v);
-
             usuario = (TextView) v.findViewById(R.id.textViewUsuario);
             fecha = (TextView) v.findViewById(R.id.textViewFechaRecibo);
             imgRecibida = (ImageView) v.findViewById(R.id.imageViewRecibida);
@@ -42,8 +41,6 @@ public class MensajeAdapter extends RecyclerView.Adapter<MensajeAdapter.ViewHold
             relativeLayout = (RelativeLayout) v.findViewById(R.id.contenedor);
             this.v = v;
         }
-
-
     }
 
     public void add(CuerpoMensaje obj, int position) {

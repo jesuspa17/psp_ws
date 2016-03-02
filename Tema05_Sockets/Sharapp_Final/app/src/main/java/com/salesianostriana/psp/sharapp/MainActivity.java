@@ -46,11 +46,15 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     MensajeAdapter mensajeAdapter;
-    private static int FILE_CODE = 1;
 
+    private static int FILE_CODE = 1;
     private static int CODIGO_CONEXION = 1;
     private static int CODIGO_ENVIO = 2;
     private static int CODIGO_DESCONEXION = 3;
+
+    //192.168.65.2
+    //172.27.60.7
+    private static String IP_SERVIDOR = "172.27.0.41";
 
     List<CuerpoMensaje> lista;
     String nom_user;
@@ -63,13 +67,17 @@ public class MainActivity extends AppCompatActivity {
     ByteArrayOutputStream baos;
     ExecutorService executorService;
 
+    //Handler que realiza los cambios en la interfaz de usuario cada vez que recibimos un mensaje
+    //del servidor.
      Handler puente = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
+            //Se recibe el mensaje
             com.salesianostriana.psp.sendfiles.SharappMessage sharappMessage = (com.salesianostriana.psp.sendfiles.SharappMessage) msg.obj;
 
+            //Elementos recibidos a mostrar en el recyclerView
             String username = sharappMessage.userName;
             Date fecha = sharappMessage.date;
             Bitmap b = Utils.decodeBitmapSize(sharappMessage.content, 300);
@@ -77,21 +85,33 @@ public class MainActivity extends AppCompatActivity {
             Log.i("HANDLER_USERNAME", sharappMessage.userName);
             Log.i("HANDLER_DATE", sharappMessage.date.toString());
 
+            //Se guarda la imagen en la memoria interna del teléfono.
             Utils.saveImage(MainActivity.this, sharappMessage.fileName, sharappMessage.content);
 
+            //Comprobación de que si el nombre de usuario que se recibe es del de nosotros,
+            //la imagen se inserte en el recyclerView de una manera animada, si no lo es, se insertará de otra manera.
             if(username.equalsIgnoreCase(nom_user)){
                 recyclerView.setItemAnimator(new SlideInLeftAnimator());
             }else{
                 recyclerView.setItemAnimator(new SlideInRightAnimator());
             }
 
-            recyclerView.getItemAnimator().setAddDuration(1000);
-            recyclerView.getItemAnimator().setRemoveDuration(1000);
-            recyclerView.getItemAnimator().setMoveDuration(1000);
-            recyclerView.getItemAnimator().setChangeDuration(1000);
+            //Se le da propiedades al movimiento de inserción.
+            recyclerView.getItemAnimator().setAddDuration(700);
+            recyclerView.getItemAnimator().setMoveDuration(700);
+            recyclerView.getItemAnimator().setChangeDuration(700);
 
-            CuerpoMensaje c = new CuerpoMensaje(username, fecha,b);
-            mensajeAdapter.add(c,lista.size());
+            //Se añade la una lista de clase CuerpoMensaje para mostrarlos en la lista.
+            mensajeAdapter.add(new CuerpoMensaje(username, fecha,b),lista.size());
+
+            //Desplaza la lista automáticamente a la última posición
+            recyclerView.post(new Runnable() {
+                @Override
+                public void run() {
+                    recyclerView.smoothScrollToPosition(mensajeAdapter.getItemCount());
+                }
+            });
+
         }
     };
 
@@ -118,14 +138,15 @@ public class MainActivity extends AppCompatActivity {
 
         //Obtengo el nombre de las preferencias y lanzo el Asynctask de conexión.
         nom_user = Utils.preferences.getString("nom_user", null);
-        new Conexion().execute(nom_user);
 
+        //Realizo la conexión al servidor con el nombre de usuario obtenido
+        new Conexion().execute(nom_user);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                //Abre activityForResult del FilePicker
                 Intent i = new Intent(MainActivity.this, FilePickerActivity.class);
                 i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
                 i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
@@ -134,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(i, FILE_CODE);
             }
         });
+
 
     }
 
@@ -153,13 +175,9 @@ public class MainActivity extends AppCompatActivity {
                         ClipData clip = data.getClipData();
                         if (clip != null) {
                             for (int i = 0; i < clip.getItemCount(); i++) {
-
                                 Uri uri = clip.getItemAt(i).getUri();
                                 Toast.makeText(this, "Enviando fichero..." + uri.getPath(), Toast.LENGTH_SHORT).show();
                                 new EnviarMensaje().execute(nom_user, uri.getPath());
-
-
-
                             }
                         }
 
@@ -167,15 +185,11 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         ArrayList<String> paths = data.getStringArrayListExtra
                                 (FilePickerActivity.EXTRA_PATHS);
-
                         if (paths != null) {
                             for (String path : paths) {
-
                                 Uri uri = Uri.parse(path);
                                 Toast.makeText(this, "Enviando fichero..." + uri.getPath(), Toast.LENGTH_SHORT).show();
                                 new EnviarMensaje().execute(nom_user, uri.getPath());
-
-
                             }
                         }
                     }
@@ -184,24 +198,21 @@ public class MainActivity extends AppCompatActivity {
                     Uri uri = data.getData();
                     Toast.makeText(this, "Enviado fichero..." + uri.getPath(), Toast.LENGTH_SHORT).show();
                     new EnviarMensaje().execute(nom_user, uri.getPath());
-
                 }
             }
         }
 
+        //AsyncTask que implementa el mensaje de conexión que se le manda al servidor.
         private class Conexion extends AsyncTask<String, Void, Void> {
 
             @Override
             protected Void doInBackground(String... params) {
                 if (params != null) {
-
-
                     try {
-                        //192.168.65.2
-                        //172.27.60.7
-                        s = new Socket("172.27.60.7", 10000);
+                        //Se inicializa el socket.
+                        s = new Socket(IP_SERVIDOR, 10000);
 
-                        //flujo que envia el objeto a través del socket
+                        //Se inicializan los flujos de lectura y escritura.
                         oos = new ObjectOutputStream(s.getOutputStream());
                         ois = new ObjectInputStream(s.getInputStream());
 
@@ -210,12 +221,12 @@ public class MainActivity extends AppCompatActivity {
                         sharappMessage.typeMessage = CODIGO_CONEXION;
                         sharappMessage.userName = params[0];
 
+                        //Se envia el mensaje serializado
                         oos.writeObject(sharappMessage);
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                 }
                 return null;
             }
@@ -223,36 +234,42 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Void aVoid) {
 
+                //Ejecuto el executorService que se encargará de que los mensajes puedan recibirse en cualquier momento.
                 executorService = Executors.newCachedThreadPool();
                 executorService.execute(new RecibirMensaje(ois,puente));
             }
         }
 
+        //AsyncTask que implementa el envío de mensajes al servidor.
         private class EnviarMensaje extends AsyncTask<String, Void, Void> {
 
             @Override
             protected Void doInBackground(String... params) {
 
-
-
                 if (params != null) {
 
+                    //Recibimos los parámetros que se le pasan, el nombre y la ruta de la imagen.
                     String nomRecibido = params[0];
                     String rutaImagen = params[1];
 
                     try {
-                        int TAM = 64 * 1024;
 
+                        int TAM = 64 * 1024;
+                        //Se inicializa el flujo de lectura que leerá la imagen recibida.
                         bis = new BufferedInputStream(new FileInputStream(rutaImagen));
+                        //Se inicializa el flujo que transformará la imagen en un array de bytes.
                         baos = new ByteArrayOutputStream();
 
+                        //se indica el tamaño del buffer
                         byte[] buffer = new byte[TAM];
                         int c;
 
+                        //se lee la información de la imagen y se va escribiendo en el buffer.
                         while ((c = bis.read(buffer, 0, TAM)) != -1) {
                             baos.write(buffer, 0, c);
                         }
 
+                        //Creo el objeto a enviar.
                         com.salesianostriana.psp.sendfiles.SharappMessage sharappMessage = new com.salesianostriana.psp.sendfiles.SharappMessage();
                         sharappMessage.typeMessage = CODIGO_ENVIO;
                         sharappMessage.userName = nomRecibido;
@@ -261,8 +278,10 @@ public class MainActivity extends AppCompatActivity {
                         sharappMessage.message = "";
                         sharappMessage.date = Calendar.getInstance().getTime();
 
+                        //Se envia.
                         oos.writeObject(sharappMessage);
 
+                        //Cierro los flujos inicializados anteriormente.
                         bis.close();
                         baos.close();
 
@@ -282,21 +301,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        //AsyncTask que implementa el mensaje de desconexión.
         private class Desconexion extends AsyncTask<String, Void, Void> {
-
             @Override
             protected Void doInBackground(String... params) {
-
                 if (params != null) {
-
                     try {
-
+                        //Recibimos el nombre de usuario a través de los parámetros y
+                        //se crea el mensaje a enviar.
                         com.salesianostriana.psp.sendfiles.SharappMessage sharappMessage = new com.salesianostriana.psp.sendfiles.SharappMessage();
                         sharappMessage.typeMessage = CODIGO_DESCONEXION;
                         sharappMessage.userName = params[0];
 
+                        //Enviamos el objeto.
                         oos.writeObject(sharappMessage);
 
+                        //Cerramos todos los fujos.
                         oos.close();
                         ois.close();
                         s.close();
@@ -318,8 +338,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onDestroy() {
             super.onDestroy();
-
-
+            //Envío el mensaje de desconexión.
+            new Desconexion().execute(nom_user);
         }
 
         @Override
@@ -332,7 +352,12 @@ public class MainActivity extends AppCompatActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             int id = item.getItemId();
             if (id == R.id.action_settings) {
+                //Envio el mensaje de desconexión, cierro el activity y limpio las preferencias.
                 new Desconexion().execute(nom_user);
+                MainActivity.this.finish();
+                startActivity(new Intent(MainActivity.this,RegistroActivity.class));
+                Utils.editor.clear();
+                Utils.editor.apply();
                 return true;
             }
 

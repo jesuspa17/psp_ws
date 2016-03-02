@@ -14,7 +14,6 @@ public class FileServer {
     public static int SHARAPP_DISCONNECT_MESSAGE = 3;
 
 
-
     //Colecci�n compartida de usuarios
     static LinkedBlockingQueue<User> usuarios;
 
